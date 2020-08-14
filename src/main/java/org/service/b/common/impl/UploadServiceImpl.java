@@ -33,12 +33,7 @@ public class UploadServiceImpl implements UploadService {
   @Override
   public void storeFile(MultipartFile file) throws IOException {
     logger.info("file: " + file.getOriginalFilename() + " " + file.getSize());
-    Long userId = userService.getCurrentUser().getId();
-    Uploaded uploaded = new Uploaded();
-    uploaded.setOriginalFilename(file.getOriginalFilename());
-    uploaded.setUserId(userId);
-    uploaded.setGeneratedName(userId + "-" + file.getOriginalFilename());
-    Uploaded u = saveUploaded(uploaded);
+    Uploaded u = createUploaded(file);
     Path filePath = Paths.get(FILE_DIRECTORY + "/" + u.getGeneratedName());
     Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
   }
@@ -46,5 +41,14 @@ public class UploadServiceImpl implements UploadService {
   @Override
   public Uploaded saveUploaded(Uploaded uploaded) {
     return uploadedRepo.save(uploaded);
+  }
+
+  private Uploaded createUploaded(MultipartFile file) {
+    Long userId = userService.getCurrentUser().getId();
+    Uploaded uploaded = new Uploaded();
+    uploaded.setOriginalFilename(file.getOriginalFilename());
+    uploaded.setUserId(userId);
+    uploaded.setGeneratedName(userId + "-" + file.getOriginalFilename());
+    return saveUploaded(uploaded);
   }
 }
