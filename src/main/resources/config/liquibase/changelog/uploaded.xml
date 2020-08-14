@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="uploaded" author="jensitus">
+        <createTable tableName="uploaded">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" unique="true" nullable="false" />
+            </column>
+            <column name="original_filename" type="VARCHAR2(255)" />
+            <column name="user_id" type="BIGINT" />
+            <column name="generated_name" type="VARCHAR2(255)" />
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
