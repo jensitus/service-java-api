@@ -63,7 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
               .csrf().disable()
               .authorizeRequests()
-                .antMatchers("/service/auth/**", "/service/users/auth/**", "/service/app/migrate/**", "/service/app/formkey/**").permitAll()
+                .antMatchers("/service/auth/**", "/service/users/auth/**", "/service/app/migrate/**", "/service/app/formkey/**", "/service/app/get-images/**").permitAll()
                 .antMatchers("/service/**").authenticated()
             .and()
               .exceptionHandling()

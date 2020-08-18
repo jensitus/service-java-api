@@ -4,6 +4,7 @@ import org.service.b.common.model.Uploaded;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 
 public interface UploadService {
@@ -11,5 +12,7 @@ public interface UploadService {
   public void storeFile(MultipartFile file) throws IOException;
 
   public Uploaded saveUploaded(Uploaded uploaded);
+
+  public List<Uploaded> getFileList();
 
 }

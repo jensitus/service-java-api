@@ -1,0 +1,5 @@
+awsProperties:
+  access_key: ${S3_ACCESS_KEY}
+  secret_key: ${S3_SECRECT_KEY}
+  bucket: "service-b-org" # ${S3_SERVICE_B_BUCKET}
+  region: "eu-central-1"
