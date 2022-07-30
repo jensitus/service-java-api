@@ -3,6 +3,7 @@ package org.service.b.todo.model;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.Data;
 import org.service.b.auth.model.User;
 
 import javax.persistence.*;
@@ -14,6 +15,7 @@ import java.util.TreeSet;
 
 @Entity
 @Table(name = "todos")
+@Data
 public class Todo {
 
   @Id
@@ -47,74 +49,14 @@ public class Todo {
   @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
   private Set<User> users;
 
+  @Column(name = "simple")
+  private boolean simple;
+
   public Todo() {}
 
   public Todo(@NotNull String title) {
     this.title = title;
   }
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public Long getCreatedBy() {
-    return createdBy;
-  }
-
-  public void setCreatedBy(Long createdBy) {
-    this.createdBy = createdBy;
-  }
-
-  public LocalDateTime getCreated_at() {
-    return created_at;
-  }
-
-  public void setCreated_at(LocalDateTime created_at) {
-    this.created_at = created_at;
-  }
-
-  public LocalDateTime getUpdated_at() {
-    return updated_at;
-  }
-
-  public void setUpdated_at(LocalDateTime updated_at) {
-    this.updated_at = updated_at;
-  }
-
-  public boolean isDone() {
-    return done;
-  }
-
-  public void setDone(boolean done) {
-    this.done = done;
-  }
-
-  public Set<Item> getItems() {
-    return items;
-  }
-
-  public void setItems(Set<Item> items) {
-    this.items = items;
-  }
-
-  public Set<User> getUsers() {
-    return users;
-  }
-
-  public void setUsers(Set<User> users) {
-    this.users = users;
-  }
 
 }

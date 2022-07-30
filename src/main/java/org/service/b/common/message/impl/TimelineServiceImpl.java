@@ -2,7 +2,6 @@ package org.service.b.common.message.impl;
 
 import org.modelmapper.ModelMapper;
 import org.service.b.common.dto.TimelineItemDto;
-import org.service.b.common.message.service.ServiceBTaskService;
 import org.service.b.common.message.service.TimelineService;
 import org.service.b.todo.dto.ItemDto;
 import org.service.b.todo.dto.TodoDto;
@@ -15,9 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,8 +31,8 @@ public class TimelineServiceImpl implements TimelineService {
   @Autowired
   private TodoRepo todoRepo;
 
-  @Autowired
-  private ServiceBTaskService serviceBTaskService;
+//  @Autowired
+//  private ServiceBTaskService serviceBTaskService;
 
   @Override
   public List<TimelineItemDto> getItemsForTimeline(Long user_id) {
@@ -71,8 +68,6 @@ public class TimelineServiceImpl implements TimelineService {
     for (Item item : oldItems) {
       TodoDto todoDto = getTodoDto(item.getTodoId());
       TimelineItemDto timelineItemDto = modelMapper.map(item, TimelineItemDto.class);
-      String taskId = serviceBTaskService.getTaskForTimeLine(timelineItemDto.getTodoId());
-      timelineItemDto.setTaskId(taskId);
       timelineItemDto.setTodoTitle(todoDto.getTitle());
       timelineItemDtos.add(timelineItemDto);
     }

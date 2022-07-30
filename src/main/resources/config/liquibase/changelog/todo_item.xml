@@ -135,4 +135,10 @@
         <modifyDataType tableName="notify_users" columnName="string_id" newDataType="VARCHAR2(255)" />
     </changeSet>
 
+    <changeSet id="add_simple_to_todo" author="jensitus">
+        <addColumn tableName="todos">
+            <column name="simple" type="BOOLEAN" defaultValue="true" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
