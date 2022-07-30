@@ -108,7 +108,7 @@ public class AuthServiceImpl implements AuthService {
     userConfirmation.setConfirmationExpiry(LocalDateTime.now());
     userConfRepo.save(userConfirmation);
     String base64token = Base64Codec.BASE64.encode(token);
-    String url = EmailStuff.DOMAIN_FOR_URL + "auth/" + base64token + "/confirm?email=" + user.getEmail();
+    String url = EmailStuff.DOMAIN_FOR_URL + "/auth/" + base64token + "/confirm?email=" + user.getEmail();
     String subject = EmailStuff.SUBJECT_PREFIX + "confirm account";
     String text = "click the link below within the next 2 hours, after this it will expire";
     serviceBOrgMailer.getTheMailDetails(user.getEmail(), subject, text, user.getUsername(), url);
