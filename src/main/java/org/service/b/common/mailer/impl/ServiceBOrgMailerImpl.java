@@ -22,8 +22,11 @@ public class ServiceBOrgMailerImpl implements ServiceBOrgMailer {
 
   private static final String DIV_CLASS_GENERAL = "<div class='general'>";
 
-  @Autowired
-  private JavaMailSender mailSender;
+  private final JavaMailSender mailSender;
+
+  public ServiceBOrgMailerImpl(JavaMailSender mailSender) {
+    this.mailSender = mailSender;
+  }
 
   @Override
   public void getTheMailDetails(String to, String subject, String text, String salutation, String url) {
