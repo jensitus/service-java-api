@@ -1,9 +1,8 @@
 package org.service.b.auth.model;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
-import org.service.b.common.util.UUIDConverter;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 

@@ -3,7 +3,7 @@ package org.service.b.todo.dto;
 import lombok.Data;
 import lombok.ToString;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 

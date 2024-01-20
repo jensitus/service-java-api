@@ -20,8 +20,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Email;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 
 @RestController
 @RequestMapping("/service/auth")

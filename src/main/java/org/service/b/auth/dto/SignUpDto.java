@@ -4,9 +4,9 @@ import org.service.b.auth.validation.NewPasswordMatch;
 import org.service.b.auth.validation.annotation.PasswordMatches;
 import org.service.b.auth.validation.annotation.ValidEmail;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.Set;
 
 @PasswordMatches

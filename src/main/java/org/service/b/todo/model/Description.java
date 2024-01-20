@@ -1,6 +1,6 @@
 package org.service.b.todo.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity

@@ -1,6 +1,6 @@
 package org.service.b.todo.form;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public class ItemForm {
 

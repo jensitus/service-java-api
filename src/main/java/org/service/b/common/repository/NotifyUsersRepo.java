@@ -6,10 +6,11 @@ import org.service.b.common.model.WhatIsReported;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface NotifyUsersRepo extends JpaRepository<NotifyUsers, String> {
+public interface NotifyUsersRepo extends JpaRepository<NotifyUsers, UUID> {
 
-  NotifyUsers findById_(String id_);
+  NotifyUsers findById_(UUID id_);
 
   List findByModelTypeAndNotified(ModelType modelType, boolean notified);
 

@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Data;
 import org.service.b.auth.model.User;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;

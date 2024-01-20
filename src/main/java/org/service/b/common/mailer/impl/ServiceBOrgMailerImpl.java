@@ -1,15 +1,13 @@
 package org.service.b.common.mailer.impl;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.service.b.common.mailer.service.ServiceBOrgMailer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 @Service
 public class ServiceBOrgMailerImpl implements ServiceBOrgMailer {

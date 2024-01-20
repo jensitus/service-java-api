@@ -1,6 +1,6 @@
 package org.service.b.common.util;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 import java.util.UUID;
 
 public class UUIDConverter implements AttributeConverter<UUID, String> {

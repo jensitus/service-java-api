@@ -1,6 +1,6 @@
 package org.service.b.auth.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
