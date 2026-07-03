@@ -5,6 +5,8 @@ import org.service.b.auth.serviceimpl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -13,12 +15,15 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Configuration
 @EnableScheduling
@@ -58,33 +63,27 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(
-                    (auth) -> auth.requestMatchers("/service/auth/**",
-                                                   "/service/users/auth/**",
-                                                   "/service/app/migrate/**",
-                                                   "/service/app/formkey/**").permitAll())
-            .authorizeHttpRequests((auth) -> auth.anyRequest().authenticated())
-            .csrf(AbstractHttpConfigurer::disable)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                           .requestMatchers(new AntPathRequestMatcher("/webapp/**"));   // <‑‑ hier wird alles frei gestellt
+    }
+
+    @Bean
+    protected SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
+
+        http.csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
-//        http.cors()
-//            .and()
-//            .csrf().disable()
-//            .authorizeRequests()
-//            .antMatchers("/service/auth/**", "/service/users/auth/**", "/service/app/migrate/**", "/service/app/formkey/**").permitAll()
-//            .antMatchers("/service/**").authenticated()
-//            .and()
-//            .exceptionHandling()
-//            .authenticationEntryPoint(unauthorizedHandler)
-//            .and()
-//            .sessionManagement()
-//            .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
+            .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+            .authorizeHttpRequests((auth) -> auth.requestMatchers(new AntPathRequestMatcher("/service/auth/**"),
+                                                                  new AntPathRequestMatcher("/service/users/auth/**"),
+                                                                  new AntPathRequestMatcher("/service/app/migrate/**"),
+                                                                  new AntPathRequestMatcher("/service/app/formkey/**"),
+                                                                  new AntPathRequestMatcher("/service/app/start-todo/**")
+                                                 ).permitAll()
+                                                 .anyRequest().authenticated());
         return http.build();
     }
 

@@ -1,6 +1,6 @@
 package org.service.b.auth.serviceimpl;
 
-import io.jsonwebtoken.impl.Base64Codec;
+
 import org.service.b.auth.dto.UserDto;
 import org.service.b.auth.dto.LoginDto;
 import org.service.b.auth.dto.SignUpDto;
@@ -29,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -62,9 +63,13 @@ public class AuthServiceImpl implements AuthService {
   @Autowired
   private ServiceBOrgMailer serviceBOrgMailer;
 
+  @Autowired
+  private ServiceBAuthenticationManager serviceBAuthenticationManager;
+
   @Override
   public UserDto getUserDtoWithJwt(LoginDto loginDto) {
-    Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
+    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
+    Authentication authentication = serviceBAuthenticationManager.authenticate(loginDto);
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtProvider.generateJwtToken(authentication);
     User user = userRepo.findByUsername(loginDto.getUsername()).orElseThrow(() -> new UsernameNotFoundException("User not found with -> username or email: " + loginDto.getUsername()));
@@ -77,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
   public Message createUser(SignUpDto signUpDto) {
     // create the new user:
     User user = new User(signUpDto.getUsername(), signUpDto.getEmail().toLowerCase(), encoder.encode(signUpDto.getPassword()));
+    user.setCreatedAt(LocalDateTime.now());
     Role uRole = new Role(RoleName.ROLE_USER);
     Set<String> roleSet = new HashSet<>();
     roleSet.add(uRole.getName().toString());
@@ -107,7 +113,7 @@ public class AuthServiceImpl implements AuthService {
     userConfirmation.setUser(user);
     userConfirmation.setConfirmationExpiry(LocalDateTime.now());
     userConfRepo.save(userConfirmation);
-    String base64token = Base64Codec.BASE64.encode(token);
+    String base64token = Base64.getEncoder().encodeToString(token.getBytes()); // Base64Codec.BASE64.encode(token);
     String url = EmailStuff.DOMAIN_FOR_URL + "/auth/" + base64token + "/confirm?email=" + user.getEmail();
     String subject = EmailStuff.SUBJECT_PREFIX + "confirm account";
     String text = "click the link below within the next 2 hours, after this it will expire";
@@ -117,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public Message confirmAccount(String base64Token, String email) {
-    String token = Base64Codec.BASE64.decodeToString(base64Token);
+    String token = new String(Base64.getDecoder().decode(base64Token)); // Base64Codec.BASE64.decodeToString(base64Token);
     User user = userRepo.findByEmail(email);
     user.setConfirmed(Boolean.TRUE);
     userRepo.save(user);
@@ -125,12 +131,5 @@ public class AuthServiceImpl implements AuthService {
     uc.setConfirmedAt(LocalDateTime.now());
     userConfRepo.save(uc);
     return new Message("User successfully confirmed");
-//    try {
-//      userRepo.save(user);
-//      userConfRepo.save(uc);
-//      return new Message("User successfully confirmed");
-//    } catch (Exception e) {
-//      return new Message(e.toString());
-//    }
   }
 }

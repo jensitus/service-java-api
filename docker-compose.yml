@@ -3,14 +3,16 @@ services:
 
   postgres:
     container_name: dev-service-postgres
-    image: postgres:11
+    image: postgres:15.10-alpine
     ports:
       - "5434:5432"
     environment:
+      - POSTGRES_DB=service
       - POSTGRES_PASSWORD=dev123
       - POSTGRES_USER=service
     volumes:
       - pg-data:/var/lib/postgresql/data
+      - ./initdb/cibseven-init.sql:/docker-entrypoint-initdb.d/cibseven-init.sql
 
   greenmail:
     container_name: dev-service-greenmail

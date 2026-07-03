@@ -1,6 +1,5 @@
 package org.service.b.auth.serviceimpl;
 
-import io.jsonwebtoken.impl.Base64Codec;
 import org.modelmapper.ModelMapper;
 import org.service.b.auth.dto.ChangePwDto;
 import org.service.b.auth.dto.UserDto;
@@ -26,14 +25,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+
 
 @Service
 public class UserServiceImpl implements UserService {
 
+  private static final int TOKEN_EXPIRY_HOURS = 2;
   private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
   @Autowired
@@ -68,7 +71,7 @@ public class UserServiceImpl implements UserService {
       return new Message("Die Emailadresse gibt es nicht", false);
     }
     String token = UUID.randomUUID().toString();
-    String base64token = Base64Codec.BASE64.encode(token);
+    String base64token = encodeBase64Token(token);
     LocalDateTime localDateTime = LocalDateTime.now();
     PasswordResetToken passwordResetToken = new PasswordResetToken(user, token, localDateTime);
     passwordResetTokenRepo.save(passwordResetToken);
@@ -82,7 +85,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public boolean checkIfTokenExpired(String base64Token, String email, String confirm) {
     if (confirm.equals("confirm")) {
-      return checkIfConfirmTokenExpired(base64Token, email);
+      return isConfirmationTokenValid(base64Token, email);
     } else {
       return checkIfResetTokenExpired(base64Token, email);
     }
@@ -102,29 +105,6 @@ public class UserServiceImpl implements UserService {
     } else {
       return new Message("password and confirmation does not match", false);
     }
-  }
-
-  private boolean checkIfResetTokenExpired(String base64Token, String email) {
-    String token = Base64Codec.BASE64.decodeToString(base64Token);
-    User user = userRepo.findByEmail(email);
-    PasswordResetToken prt = passwordResetTokenRepo.findByTokenAndUserId(token, user.getId());
-    LocalDateTime exp = prt.getExpiryDate();
-    if (exp.plusHours(2).isBefore(LocalDateTime.now())) {
-      logger.info(exp.toString());
-      return false;
-    }
-    return true;
-  }
-
-  private boolean checkIfConfirmTokenExpired(String base64Token, String email) {
-    String token = Base64Codec.BASE64.decodeToString(base64Token);
-    User user = userRepo.findByEmail(email);
-    UserConfirmation uc = userConfirmationRepo.findByConfirmationTokenAndUserId(token, user.getId());
-    LocalDateTime exp = uc.getConfirmationExpiry();
-    if (exp.plusHours(2).isBefore(LocalDateTime.now())) {
-      return false;
-    }
-    return true;
   }
 
   @Override
@@ -164,6 +144,43 @@ public class UserServiceImpl implements UserService {
     } catch (Exception e) {
       return new Message(e.getLocalizedMessage(), false);
     }
+  }
+
+  private boolean checkIfResetTokenExpired(String base64Token, String email) {
+    PasswordResetToken passwordResetToken = getPasswordResetToken(base64Token, email);
+    LocalDateTime expiryDatePlusBuffer = passwordResetToken.getExpiryDate().plusHours(TOKEN_EXPIRY_HOURS);
+    logger.info(passwordResetToken.getExpiryDate().toString());
+    return !expiryDatePlusBuffer.isBefore(LocalDateTime.now());
+
+  }
+
+  private PasswordResetToken getPasswordResetToken(String base64Token, String email) {
+    String token = decodeBase64Token(base64Token);
+    User user = userRepo.findByEmail(email);
+    return passwordResetTokenRepo.findByTokenAndUserId(token, user.getId());
+  }
+
+  private boolean isConfirmationTokenValid(String base64Token, String email) {
+    String token = decodeBase64Token(base64Token);
+    User user = userRepo.findByEmail(email);
+    UserConfirmation uc = userConfirmationRepo.findByConfirmationTokenAndUserId(token, user.getId());
+    return !isTokenExpired(uc.getConfirmationExpiry());
+  }
+
+  private String decodeBase64Token(String encodedToken) {
+    return new String(Base64.getDecoder().decode(encodedToken));
+  }
+
+  private String encodeBase64Token(String token) {
+    return Base64.getEncoder().encodeToString(token.getBytes());
+  }
+
+  private boolean isTokenExpired(LocalDateTime expiryTime) {
+    return expiryTime.plusHours(2).isBefore(LocalDateTime.now());
+  }
+
+  public Message encodePw(String pw) {
+    return new Message(encoder.encode(pw));
   }
 
 }

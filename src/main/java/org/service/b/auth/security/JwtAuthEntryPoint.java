@@ -18,6 +18,10 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
 
   @Override
   public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
+    String path = request.getRequestURI();
+    if (path.contains("/webapp/translations_en.json") || path.contains("/engine-rest/authorization")) {
+      return;
+    }
     logger.info("e begin: ");
     logger.info(e.getClass().getSimpleName().toString());
     logger.info(e.toString());
@@ -28,7 +32,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
       logger.error(e.getClass().getSimpleName() + " " + e.getMessage());
       response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
     } else {
-      logger.error("Jesus Unauthorized error. Message - {}", e.getMessage());
+      logger.error("Unauthorized error. Message - {}", e.getMessage());
       logger.info(e.getClass().getSimpleName());
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error -> Unauthorized");
     }

@@ -23,4 +23,6 @@ public interface UserService {
 
   Message changePw(ChangePwDto changePwDto);
 
+  Message encodePw(String pw);
+
 }

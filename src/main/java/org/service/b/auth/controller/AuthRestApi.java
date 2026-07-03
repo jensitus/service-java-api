@@ -129,4 +129,9 @@ public class AuthRestApi {
     }
   }
 
+  @GetMapping("/create-pw/{pw}")
+    public ResponseEntity<Message> createPw(@PathVariable("pw") String pw) {
+      return ResponseEntity.ok(userService.encodePw(pw));
+  }
+
 }

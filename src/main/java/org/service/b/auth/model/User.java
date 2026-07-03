@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.NaturalId;
 import org.service.b.todo.model.Todo;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +29,9 @@ public class User {
   @NaturalId
   @Email
   private String email;
+
+  @Column(name = "created_at")
+  private LocalDateTime createdAt;
 
   @Column(name = "password")
   @NotNull
@@ -108,5 +112,13 @@ public class User {
 
   public void setConfirmed(Boolean confirmed) {
     this.confirmed = confirmed;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
   }
 }
