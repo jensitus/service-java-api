@@ -17,6 +17,7 @@ import org.service.b.todo.model.Todo;
 import org.service.b.todo.repository.DescriptionRepo;
 import org.service.b.todo.repository.ItemRepo;
 import org.service.b.todo.repository.TodoRepo;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +131,7 @@ public class ItemService {
    * We will need the scheduler below in future versions
    */
   @Scheduled(cron = "0 10 * * * *")
+  @SchedulerLock(name = "checkFixedRateTask", lockAtMostFor = "PT5M", lockAtLeastFor = "PT30S")
   @Transactional
   public void checkFixedRateTask() {
     LocalDate dueDateStart = LocalDate.now();
@@ -164,6 +166,7 @@ public class ItemService {
   }
 
   @Scheduled(cron = "0 0/5 7-21 * * *")
+  @SchedulerLock(name = "informAboutNewItem", lockAtMostFor = "PT4M", lockAtLeastFor = "PT30S")
   @Transactional
   public synchronized void informAboutNewItem() {
     List<ItemDto> itemDtoList = new ArrayList<>();
