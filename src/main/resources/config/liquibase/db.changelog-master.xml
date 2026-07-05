@@ -10,4 +10,6 @@
   <include file="config/liquibase/changelog/user_friendship.xml"/>
   <include file="config/liquibase/changelog/user_confirmation.xml" />
   <include file="config/liquibase/changelog/cleaning-up.xml" />
+  <include file="config/liquibase/changelog/crypto.xml" />
+  <include file="config/liquibase/changelog/shedlock.xml" />
 </databaseChangeLog> 

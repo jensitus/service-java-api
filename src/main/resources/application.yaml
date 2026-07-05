@@ -52,6 +52,10 @@ service:
         jwtSecret: theRealSecret_my-super-secure-secret-that-is-at-least-32-und-noch-64
         jwtExpiration: 286406400
         jwtResetExpiration: 7200000
+        # Used to encrypt third-party API keys (e.g. Bitpanda) at rest.
+        # Override both in production. Salt must be hex-encoded.
+        encryptionPassword: change-me-bitpanda-key-encryption-password
+        encryptionSalt: 5c0744940b5c369b
 
 # # # # # # # # # #
 # mail props

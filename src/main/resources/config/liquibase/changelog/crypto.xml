@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="crypto-price-cache-1" author="jensitus">
+        <createTable tableName="crypto_price_cache">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" unique="true"/>
+            </column>
+            <column name="coin_id" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="coin_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_usd" type="DECIMAL(20,8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_change_24h" type="DECIMAL(10,4)"/>
+            <column name="market_cap_usd" type="DECIMAL(25,2)"/>
+            <column name="fetched_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="crypto-trade-1" author="jensitus">
+        <createTable tableName="crypto_trade">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" unique="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="coin_id" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="side" type="VARCHAR(4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="DECIMAL(20,8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_per_unit" type="DECIMAL(20,8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fee" type="DECIMAL(20,8)" defaultValue="0"/>
+            <column name="traded_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="note" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="price-alert-1" author="jensitus">
+        <createTable tableName="price_alert">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" unique="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="coin_id" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_price" type="DECIMAL(20,8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="condition_" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValue="true"/>
+            <column name="triggered" type="BOOLEAN" defaultValue="false"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="crypto-price-history-1" author="jensitus">
+        <createTable tableName="crypto_price_history">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" unique="true"/>
+            </column>
+            <column name="coin_id" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_usd" type="DECIMAL(20,8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recorded_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="crypto_price_history" indexName="idx_price_history_coin_time">
+            <column name="coin_id"/>
+            <column name="recorded_at"/>
+        </createIndex>
+    </changeSet>
+
+
+    <changeSet id="crypto-eur-currency-1" author="jensitus">
+        <addColumn tableName="crypto_price_cache">
+            <column name="price_eur" type="DECIMAL(20,8)"/>
+            <column name="price_change_24h_eur" type="DECIMAL(10,4)"/>
+            <column name="market_cap_eur" type="DECIMAL(25,2)"/>
+        </addColumn>
+        <addColumn tableName="crypto_price_history">
+            <column name="price_eur" type="DECIMAL(20,8)"/>
+        </addColumn>
+        <addColumn tableName="crypto_trade">
+            <column name="currency" type="VARCHAR(3)" defaultValue="EUR"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="bitpanda-integration-1" author="jensitus">
+        <createTable tableName="bitpanda_credential">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" unique="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="api_key_encrypted" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="last_synced_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+
+        <addColumn tableName="crypto_trade">
+            <column name="source" type="VARCHAR(20)" defaultValue="MANUAL"/>
+            <column name="external_id" type="VARCHAR(100)"/>
+        </addColumn>
+        <createIndex tableName="crypto_trade" indexName="idx_crypto_trade_user_external">
+            <column name="user_id"/>
+            <column name="external_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
