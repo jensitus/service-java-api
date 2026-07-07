@@ -77,7 +77,10 @@ public class WebSecurityConfig {
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
             .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
-            .authorizeHttpRequests((auth) -> auth.requestMatchers(new AntPathRequestMatcher("/service/auth/**"),
+            .authorizeHttpRequests((auth) -> auth
+                                                 // Let CORS preflight requests through — they carry no auth by design.
+                                                 .requestMatchers(new AntPathRequestMatcher("/**", "OPTIONS")).permitAll()
+                                                 .requestMatchers(new AntPathRequestMatcher("/service/auth/**"),
                                                                   new AntPathRequestMatcher("/service/users/auth/**"),
                                                                   new AntPathRequestMatcher("/service/app/migrate/**"),
                                                                   new AntPathRequestMatcher("/service/app/formkey/**"),

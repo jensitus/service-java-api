@@ -39,6 +39,8 @@ public class AuthServiceImpl implements AuthService {
 
   private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
+  private static final int CONFIRMATION_EXPIRY_HOURS = 2;
+
   @Autowired
   AuthenticationManager authenticationManager;
 
@@ -111,7 +113,7 @@ public class AuthServiceImpl implements AuthService {
     UserConfirmation userConfirmation = new UserConfirmation();
     userConfirmation.setConfirmationToken(token);
     userConfirmation.setUser(user);
-    userConfirmation.setConfirmationExpiry(LocalDateTime.now());
+    userConfirmation.setConfirmationExpiry(LocalDateTime.now().plusHours(CONFIRMATION_EXPIRY_HOURS));
     userConfRepo.save(userConfirmation);
     String base64token = Base64.getEncoder().encodeToString(token.getBytes()); // Base64Codec.BASE64.encode(token);
     String url = EmailStuff.DOMAIN_FOR_URL + "/auth/" + base64token + "/confirm?email=" + user.getEmail();

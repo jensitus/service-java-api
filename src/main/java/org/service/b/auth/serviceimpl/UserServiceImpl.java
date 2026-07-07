@@ -72,8 +72,8 @@ public class UserServiceImpl implements UserService {
     }
     String token = UUID.randomUUID().toString();
     String base64token = encodeBase64Token(token);
-    LocalDateTime localDateTime = LocalDateTime.now();
-    PasswordResetToken passwordResetToken = new PasswordResetToken(user, token, localDateTime);
+    LocalDateTime expiryDate = LocalDateTime.now().plusHours(TOKEN_EXPIRY_HOURS);
+    PasswordResetToken passwordResetToken = new PasswordResetToken(user, token, expiryDate);
     passwordResetTokenRepo.save(passwordResetToken);
     String url = EmailStuff.DOMAIN_FOR_URL + "/auth/reset_password/" + base64token + "/edit?email=" + user.getEmail();
     String subject = EmailStuff.SUBJECT_PREFIX + " reset instructions";
@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public boolean checkIfTokenExpired(String base64Token, String email, String confirm) {
-    if (confirm.equals("confirm")) {
+    if ("confirm".equals(confirm)) {
       return isConfirmationTokenValid(base64Token, email);
     } else {
       return checkIfResetTokenExpired(base64Token, email);
@@ -93,18 +93,21 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public Message resetPassword(PasswordResetForm passwordResetForm, String base64Token, String email) {
-    if (passwordResetForm.getPassword().equals(passwordResetForm.getPassword_confirmation())) {
-      if (checkIfResetTokenExpired(base64Token, email)) {
-        User user = userRepo.findByEmail(passwordResetForm.getEmail());
-        user.setPassword(encoder.encode(passwordResetForm.getPassword()));
-        userRepo.save(user);
-        return new Message("toll", true);
-      } else {
-        return new Message("Die Zeit ist abgelaufen", false);
-      }
-    } else {
+    if (!passwordResetForm.getPassword().equals(passwordResetForm.getPassword_confirmation())) {
       return new Message("password and confirmation does not match", false);
     }
+    PasswordResetToken passwordResetToken = getPasswordResetToken(base64Token, email);
+    if (passwordResetToken == null || isResetTokenExpired(passwordResetToken)) {
+      return new Message("Die Zeit ist abgelaufen", false);
+    }
+    // Bind the reset to the account the token was issued for — never to a
+    // client-supplied email — so a valid token cannot reset another user's password.
+    User user = passwordResetToken.getUser();
+    user.setPassword(encoder.encode(passwordResetForm.getPassword()));
+    userRepo.save(user);
+    // Single use: consume the token so it cannot be replayed.
+    passwordResetTokenRepo.delete(passwordResetToken);
+    return new Message("toll", true);
   }
 
   @Override
@@ -146,24 +149,36 @@ public class UserServiceImpl implements UserService {
     }
   }
 
+  // true = the token exists and is still valid (not expired)
   private boolean checkIfResetTokenExpired(String base64Token, String email) {
     PasswordResetToken passwordResetToken = getPasswordResetToken(base64Token, email);
-    LocalDateTime expiryDatePlusBuffer = passwordResetToken.getExpiryDate().plusHours(TOKEN_EXPIRY_HOURS);
-    logger.info(passwordResetToken.getExpiryDate().toString());
-    return !expiryDatePlusBuffer.isBefore(LocalDateTime.now());
+    return passwordResetToken != null && !isResetTokenExpired(passwordResetToken);
+  }
 
+  private boolean isResetTokenExpired(PasswordResetToken passwordResetToken) {
+    return passwordResetToken.getExpiryDate().isBefore(LocalDateTime.now());
   }
 
   private PasswordResetToken getPasswordResetToken(String base64Token, String email) {
     String token = decodeBase64Token(base64Token);
     User user = userRepo.findByEmail(email);
+    if (user == null) {
+      return null;
+    }
     return passwordResetTokenRepo.findByTokenAndUserId(token, user.getId());
   }
 
   private boolean isConfirmationTokenValid(String base64Token, String email) {
     String token = decodeBase64Token(base64Token);
     User user = userRepo.findByEmail(email);
+    if (user == null) {
+      return false;
+    }
     UserConfirmation uc = userConfirmationRepo.findByConfirmationTokenAndUserId(token, user.getId());
+    // Reject unknown tokens and already-consumed confirmations (single use).
+    if (uc == null || uc.getConfirmedAt() != null) {
+      return false;
+    }
     return !isTokenExpired(uc.getConfirmationExpiry());
   }
 
@@ -176,7 +191,7 @@ public class UserServiceImpl implements UserService {
   }
 
   private boolean isTokenExpired(LocalDateTime expiryTime) {
-    return expiryTime.plusHours(2).isBefore(LocalDateTime.now());
+    return expiryTime.isBefore(LocalDateTime.now());
   }
 
   public Message encodePw(String pw) {
