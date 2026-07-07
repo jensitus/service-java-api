@@ -17,7 +17,7 @@
     <properties>
         <java.version>17</java.version>
         <greenmail-junit5.version>1.6.5</greenmail-junit5.version>
-        <jsoup.version>1.10.2</jsoup.version>
+        <jsoup.version>1.15.3</jsoup.version>
         <cibseven.version>2.0.0</cibseven.version>
         <jjwt.version>0.12.6</jjwt.version>
         <shedlock.version>5.16.0</shedlock.version>
